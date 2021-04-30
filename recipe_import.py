@@ -3,15 +3,34 @@ from bs4 import BeautifulSoup
 
 url = "https://automatetheboringstuff.com/chapter11/"
 url2 = "https://www.allrecipes.com/recipe/269592/pork-chops-in-garlic-mushroom-sauce/"
-r = requests.get(url2)
+url3 = "https://www.allrecipes.com/recipe/47247/chili-rellenos-casserole/"
+r = requests.get(url3)
 
 soup = BeautifulSoup(r.text, 'html.parser')
+title = soup.title.string
 
-for header in soup.find_all('h1'):
-    print(header)
-    if re.search("Ingredient", str(header)):
-        print(header)
+def find_ingredients_section(soup):
+    elements= soup.find_all(['ul'])
+    for e in elements:
+        if e.has_attr('class'):
+            if re.search("ingredients",str(e['class'])):
+                return e
 
-for header in soup.find_all('h2'):
-    if re.search("Ingredients", str(header.string)):
-        print(header.string)
+
+def parse_ingredient_list(ingredients):
+    ret = []
+    ingredient = ingredients.find_all('span')
+    for item in ingredient:
+        if item.has_attr('class'):
+            if re.search("name",str(item['class'])):
+                ret.append(str(item.string))
+    return ret
+
+section = find_ingredients_section(soup)
+ingredients = parse_ingredient_list(section)
+
+print(title)
+print( '\tIngredients:')
+for i in ingredients:
+    print('\t' + i)
+
